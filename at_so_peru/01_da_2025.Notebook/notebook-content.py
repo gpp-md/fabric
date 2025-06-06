@@ -9,12 +9,12 @@
 # META   },
 # META   "dependencies": {
 # META     "lakehouse": {
-# META       "default_lakehouse": "e3855f18-b45a-4731-83e4-0cf85edc3213",
-# META       "default_lakehouse_name": "lh_peru2025",
+# META       "default_lakehouse": "39f98f73-8776-48bc-905b-31d3f11de9f7",
+# META       "default_lakehouse_name": "lh_2025_peru",
 # META       "default_lakehouse_workspace_id": "9680dc28-bc8c-4d47-900d-ccf7674e4b49",
 # META       "known_lakehouses": [
 # META         {
-# META           "id": "e3855f18-b45a-4731-83e4-0cf85edc3213"
+# META           "id": "39f98f73-8776-48bc-905b-31d3f11de9f7"
 # META         }
 # META       ]
 # META     }
@@ -39,7 +39,7 @@
 
 # Welcome to your new notebook
 # Type here in the cell editor to add code!
-%pip install wget xlsxwriter fastexcel pyarrow polars
+%pip install wget xlsxwriter fastexcel pyarrow polars deltalake
 
 # METADATA ********************
 
@@ -68,6 +68,7 @@ import polars as pl
 import polars.selectors as cs
 from xlsxwriter import Workbook
 import zipfile
+from deltalake.writer import write_deltalake
 # !apt install chromium-chromedriver
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -148,7 +149,21 @@ dtype_polars = {'SECTOR':pl.String,
            'TOTAL PROGG':pl.Float64,
            'prog_mef':pl.Float64,
            'MONTO_PIA':pl.Int64,
-           'MONTO_PIM':pl.Int64           
+           'MONTO_PIM':pl.Int64,
+           'mto_girado_01': pl.Float64,
+           'mto_girado_02': pl.Float64,
+           'mto_girado_03': pl.Float64,
+           'mto_girado_04': pl.Float64,
+           'mto_girado_05': pl.Float64,
+           'mto_girado_06': pl.Float64,
+           'mto_girado_07': pl.Float64,
+           'mto_girado_08': pl.Float64,
+           'mto_girado_09': pl.Float64,
+           'mto_girado_10': pl.Float64,
+           'mto_girado_11': pl.Float64,
+           'mto_girado_12': pl.Float64,
+           'Girado.': pl.Float64,
+           'Saldo Girado.': pl.Float64
            }
 
 df1 = pl.DataFrame()
@@ -1734,12 +1749,15 @@ print("--- %s seconds --- INVERSIONES PROGRAMACION MENSUAL PARA COMPARATIVO DE M
 df1 = df1.filter(pl.col('ano_eje') == anio[0])
 df1 = df1.with_columns(pl.col('ano_eje').cast(pl.Utf8, strict=False))
 df1 = df1.with_columns(pl.col('sec_ejec').cast(pl.Utf8, strict=False))
+
+
 data_12 = data_12.with_columns(
     pl.col('sec_ejec').cast(pl.Utf8, strict=False),
     pl.col('Mef').cast(pl.Float64)
     )
-
 formato_fecha = '%d/%m/%Y'
+
+
 data_12e = data_12e.with_columns(
     # pl.col("mes").str.to_date(format=formato_fecha),
     pl.col('sec_ejec').cast(pl.Int64),
@@ -1748,6 +1766,7 @@ data_12e = data_12e.with_columns(
 # print('data_12e',data_12e)
 print("--- %s seconds --- ANTES DE GRABAR" % (time.time() - start_time))
 
+# df1 = df1.fill_null(0)
 ###############################
 dfss = (df1
        .select(['nivel','dnpp','sector','pliego','sec_ejec','unidad_ejecutora','producto_proyecto', 'pliego Nombre abrev'])
@@ -1778,9 +1797,16 @@ dfss = (dfss
 )
 ###############################
 
+###############################            keys_dnpp     únicos
+keys_dnpp = (df1
+.filter(pl.col('Tipo de gasto') == 'Inversiones')
+.select(pl.col('key_total'))
+)
+###############################
 
 # archivof = archivo_zip_local[:-4]
 # print('archivof', archivof)
+
 if sector == '1':
     # print("--- %s seconds --- antes csv" % (time.time() - start_time))
     # df1.write_csv(f'{sector}_ejecucion_gastos_{anio[0]}_diciembre_da.csv' )
@@ -1818,12 +1844,32 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 # CELL ********************
 
-ruta_pq = 'abfss://at_so_peru@onelake.dfs.fabric.microsoft.com/lh_peru2025.Lakehouse/Tables/2025'
+###                SHEET1
+Sheet1 = 'abfss://at_so_peru@onelake.dfs.fabric.microsoft.com/lh_2025_peru.Lakehouse/Tables/Sheet1'
 df1.write_delta(
-    ruta_pq,
+    Sheet1,
     mode="overwrite",
     # storage_options=storage_options,
-    # delta_write_options={"schema_mode": "overwrite"}
+    delta_write_options={"schema_mode": "overwrite"},
+    )
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "jupyter_python"
+# META }
+
+# CELL ********************
+
+###                DATA DEL MEF
+df_19 = 'abfss://at_so_peru@onelake.dfs.fabric.microsoft.com/lh_2025_peru.Lakehouse/Tables/df_19'
+data_12.write_delta(
+    df_19,
+    mode="overwrite",
+    # storage_options=storage_options,
+    delta_write_options={"schema_mode": "overwrite"},
     )
 
 # METADATA ********************
@@ -1835,7 +1881,141 @@ df1.write_delta(
 
 # CELL ********************
 
-'/lakehouse/default/Tables/2025'
+###                DATA DE EJECUCION MENSUAL
+df_ejecucion_mensual = 'abfss://at_so_peru@onelake.dfs.fabric.microsoft.com/lh_2025_peru.Lakehouse/Tables/df_ejecucion_mensual'
+data_12e.write_delta(
+    df_ejecucion_mensual,
+    mode="overwrite",
+    # storage_options=storage_options,
+    delta_write_options={"schema_mode": "overwrite"},
+    )
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "jupyter_python"
+# META }
+
+# CELL ********************
+
+###                KEYS_DNPP
+t_keys_dnpp = 'abfss://at_so_peru@onelake.dfs.fabric.microsoft.com/lh_2025_peru.Lakehouse/Tables/keys_dnpp'
+keys_dnpp.write_delta(
+    t_keys_dnpp,
+    mode="overwrite",
+    # storage_options=storage_options,
+    delta_write_options={"schema_mode": "overwrite"},
+    )
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "jupyter_python"
+# META }
+
+# CELL ********************
+
+###                KEYS_DNPP
+
+# Crear un rango de fechas
+fecha = pl.date_range(date(2025, 1, 1), date(2025, 12, 31), "1d", eager=True).alias("Fecha")
+# Convertir a Polars DataFrame
+df_fecha = pl.DataFrame({"Date": fecha})
+
+# Crear columnas adicionales
+calendar_df = df_fecha.with_columns(
+    pl.col("Date").dt.year().alias("Año"),
+    pl.col("Date").dt.month().alias("mes_numero"),
+    pl.col("Date").dt.quarter().alias("trimestre"),
+    pl.col("Date").dt.week().alias("semana_numero"),
+)
+calendar_df = calendar_df.with_columns(mes = pl.lit('')) 
+
+mes_dict = {
+    1 : 'Enero', 2 : 'Febrero', 3 : 'Marzo', 4 : 'Abril',
+    5 : 'Mayo', 6 : 'Junio', 7 : 'Julio', 8 : 'Agosto',
+    9 : 'Septiembre', 10 : 'Octubre', 11 : 'Noviembre', 12 : 'Diciembre',
+}
+# Crear una lista de condiciones y resultados
+conditions = [
+    (pl.col('mes_numero') == key, pl.lit(value))
+    for key, value in mes_dict.items()
+]
+# Aplicar las condiciones en un bucle
+expr = pl.when(conditions[0][0]).then(conditions[0][1])
+for condition, result in conditions[1:]:
+    expr = expr.when(condition).then(result)
+# Finalizar con otherwise para mantener el valor original si no se cumple ninguna condición
+calendar_df = calendar_df.with_columns(
+    expr.otherwise(calendar_df['mes']).alias('mes')
+)
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "jupyter_python"
+# META }
+
+# CELL ********************
+
+###                Fecha
+path_table = 'abfss://at_so_peru@onelake.dfs.fabric.microsoft.com/lh_2025_peru.Lakehouse/Tables/Fecha'
+calendar_df.write_delta(
+    path_table,
+    mode="overwrite",
+    delta_write_options={"schema_mode": "overwrite"},
+)
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "jupyter_python"
+# META }
+
+# CELL ********************
+
+###                UNE PARQUET 2023AL2025
+
+from deltalake.writer import write_deltalake
+
+# Ruta a la carpeta con los archivos
+folder_path ='/lakehouse/default/Files/archivos_parquet'
+
+# Filtrar los primeros 3 archivos que contengan 'parque' en el nombre
+archivos = sorted([
+    os.path.join(folder_path, f)
+    for f in os.listdir(folder_path)
+    if "parque" in f.lower() and f.endswith(('.csv', '.parquet'))
+])[:3]
+print(archivos)
+# Leer y concatenar los archivos con Polars
+dfs = [pl.read_csv(f) if f.endswith(".csv") else pl.read_parquet(f) for f in archivos]
+df_total = pl.concat(dfs)
+
+# Guardar como tabla Delta (requiere que el DataFrame tenga tipos compatibles con Arrow)
+output_path = 'abfss://at_so_peru@onelake.dfs.fabric.microsoft.com/lh_2025_peru.Lakehouse/Tables/data_total'
+
+# output_path = "ruta/salida/tabla_delta"
+
+write_deltalake(output_path, df_total.to_arrow(), mode="overwrite")
+
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "jupyter_python"
+# META }
+
+# CELL ********************
+
+
+
 
 # METADATA ********************
 
