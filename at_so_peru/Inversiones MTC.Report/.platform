@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Inversiones MTC"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "88cf47c3-6719-8715-4918-9c48e53e4455"
+  }
+}

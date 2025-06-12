@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Inversiones MINEM"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "b677664f-532e-8ba5-4539-458bad4be3af"
+  }
+}

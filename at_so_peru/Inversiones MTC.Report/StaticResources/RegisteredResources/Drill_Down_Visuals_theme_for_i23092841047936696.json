@@ -1,0 +1,49 @@
+{
+  "name": "Drill Down Visuals theme for idiaz@gestionpublicaperu.com.pe",
+  "visualStyles": {
+    "*": {
+      "*": {
+        "paid": [
+          {
+            "show": true
+          }
+        ],
+        "license": [
+          {
+            "key": "Drill Down Visuals PRO USER LICENSE in a license owning LE; 5 users (valid until: 2025-12-20);PBI-86z903wm1#oq+6uTpwwp+AGO6rSXURca8/NRGW1+BiqRaU1ybqUp+lwXqcjn48ZRR+D4C1EmWlEUj4Wk8ShN91Qwxp4k5N+rFvc5VhbXOPji5k0QtiFivpkHQ976zhlrlVCIKYArCP/IODnTAkFs6sxL",
+            "hash": "LEgWpAkZHc/U+2d35ssTeB99vZzEi7iAaIw47ywPVAP0/FfGYc1H+I2iT4Ouwu/vigBL7EGU+KSrhTzGIIy3G32xgVxlLHaFxSvIk4OumfG80iOPoj3v+fCbFKBIUlW2BK7eE3C+WrveNF8e94i69RwgGWUVrlV6d4bU7ZxvfByUpvt1I/mZN7WsKoPY07xErX2KvSTQ=="
+          }
+        ],
+        "outspacePane": [
+          {
+            "headerSize": 8
+          }
+        ],
+        "filterCard": [
+          {
+            "$id": "Applied",
+            "textSize": 8
+          },
+          {
+            "$id": "Available",
+            "textSize": 8
+          }
+        ]
+      }
+    }
+  },
+  "textClasses": {
+    "label": {
+      "fontSize": 8,
+      "fontFace": "Calibri"
+    },
+    "title": {
+      "fontSize": 8,
+      "fontFace": "Calibri"
+    },
+    "header": {
+      "fontFace": "Calibri",
+      "fontSize": 8
+    }
+  }
+}
